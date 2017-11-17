@@ -22,6 +22,7 @@ int main(int argc, const char * argv[]) {
 	string line;
 	string nextExp;
 	
+	int forAndEnds = 0;
 	int depth = 0;
 	int paranthesis = 0;
 	
@@ -51,6 +52,7 @@ int main(int argc, const char * argv[]) {
 			switch(state){
 				case FOR:
 					keywords -> push("FOR");
+					forAndEnds ++;
 					state = PARENTHESIS_VAR;
 					break;
 					
@@ -119,6 +121,7 @@ int main(int argc, const char * argv[]) {
 				case FOR_OR_EXPRESS:
 					if (nextExp == "FOR"){
 						keywords -> push("FOR");
+						forAndEnds ++;
 						state = PARENTHESIS_VAR;
 					} else{
 						identifiers -> push(nextExp.substr(0, nextExp.find('=')));
@@ -127,27 +130,45 @@ int main(int argc, const char * argv[]) {
 					break;
 					
 				case EXPRESS_OPERATOR:
-
+					operators -> push(nextExp);
+					state = VAR_CONSTANT;
 					break;
+					
 				case VAR_CONSTANT:
-
+					constants -> push(nextExp);
+					state = FOR_OR_END_OR_EXP;
 					break;
-				case FOR_OR_END:
-
+					
+				case FOR_OR_END_OR_EXP:
+					if (nextExp == "FOR"){
+						keywords -> push("FOR");
+						forAndEnds ++;
+						state = PARENTHESIS_VAR;
+					} else if (nextExp == "END"){
+						keywords -> push("END");
+						forAndEnds --;
+					} else if (nextExp == "+" || nextExp == "-" || nextExp == "/" || nextExp == "*" || nextExp == "%"){
+						operators -> push(nextExp);
+						state = VAR_CONSTANT;
+					}
 					break;
+				
+					//is this thing even necessary
 				case END:
 
 					break;
 			}
-			//check for loops, if loop then check for begin, if begin then check for end
-			
-			
 		}
 	}
-	
-	
 	return 0;
 }
+
+//fix depth
+//how to check to see if the program has ended
+
+
+
+
 
 //use stack to hold syntax errors
 //use stack to hold which keywords are used

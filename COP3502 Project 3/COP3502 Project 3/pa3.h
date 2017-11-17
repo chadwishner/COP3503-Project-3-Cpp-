@@ -55,17 +55,12 @@ enum State {
 	FOR_OR_EXPRESS,
 	EXPRESS_OPERATOR,
 	VAR_CONSTANT,
-	FOR_OR_END,
+	FOR_OR_END_OR_EXP,
 	END,
 };
 
-//int counthDepth(string line);
-//Stack findKeyWords(string line);
-//Stack findIdentifiers(string line);
-//Stack findConstants(string line);
-//Stack findOperators(string line);
-//Stack findDelimiters(string line);
-//Stack findSyntaxErrors(string line);
+//string[] convertToArray (Stack stack);
+void print(string[] keywords, string[] identifiers, string[] constants, string[] operators, string[] delimiters, sting[] syntaxErrors);
 
 
 

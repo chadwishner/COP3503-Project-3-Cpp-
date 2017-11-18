@@ -23,14 +23,15 @@ int main(int argc, const char * argv[]) {
 	string nextExp;
 	
 	int forAndEnds = 0;
-	int depth = 0;
+	int currentDepth = 0;
+	int maxDepth = 0;
 	int paranthesis = 0;
 	
 	Stack* keywords = new Stack();
 	Stack* identifiers = new Stack();
 	Stack* constants = new Stack();
 	Stack* operators = new Stack();
-	Stack* Delimiters = new Stack();
+//	Stack* Delimiters = new Stack();
 	Stack* errors = new Stack();
 	
 	cout << "Please enter the name of the input file: " << endl;
@@ -111,7 +112,10 @@ int main(int argc, const char * argv[]) {
 				case BEGIN:
 					if (nextExp == "BEGIN"){
 						keywords -> push("BEGIN");
-						depth ++;
+						currentDepth ++;
+						if (currentDepth > maxDepth){
+							maxDepth = currentDepth;
+						}
 					} else {
 						errors -> push(nextExp);
 					}
@@ -147,12 +151,15 @@ int main(int argc, const char * argv[]) {
 					} else if (nextExp == "END"){
 						keywords -> push("END");
 						forAndEnds --;
+						currentDepth --;
 					} else if (nextExp == "+" || nextExp == "-" || nextExp == "/" || nextExp == "*" || nextExp == "%"){
 						operators -> push(nextExp);
 						state = VAR_CONSTANT;
+					} else if (!file.good()){
+						break;
 					}
 					break;
-				
+
 					//is this thing even necessary
 				case END:
 
@@ -160,19 +167,110 @@ int main(int argc, const char * argv[]) {
 			}
 		}
 	}
+	string* keywordsString = new string[10];
+	string* identifiersString = new string[10];
+	string* constantsString = new string[10];
+	string* operatorsString = new string[10];
+	string* errorsString = new string[10];
+	
+	keywordsString = convertToArray(keywords);
+	identifiersString = convertToArray(identifiers);
+	constantsString = convertToArray(constants);
+	operatorsString = convertToArray(operators);
+	errorsString = convertToArray(errors);
+	
+	print(maxDepth, keywordsString, identifiersString, constantsString, operatorsString, errorsString);
+
 	return 0;
 }
 
-//fix depth
-//how to check to see if the program has ended
+string* convertToArray(Stack stack){
+	string* array = new string[10];
+	string temp;
+	bool alreadyThere = false;
+	
+	while (stack.isEmpty()){
+		temp = stack.pop();
+		for (int x = 0; x < array -> length(); x++){
+			if (temp == array[x]){
+				alreadyThere = true;
+			}
+		}
+		for (int y = 0; y < array -> length(); y++){
+			if (array[y].compare(NULL) == 0 && !alreadyThere){
+				array[y] = temp;
+			}
+		}
+		alreadyThere = false;
+	}
+	return array;
+}
 
+void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors){
+	int x = 0;
+	cout << "The depth of nested loop(s) is " << maxDepth << endl;
+	cout << "Keywords: ";
+	while (keywords[x].compare(NULL) != 0){
+		cout << keywords[x] << " ";
+		x ++;
+	}
+	cout << endl;
+	x = 0;
+	cout << "Identifiers: ";
+	while (identifiers[x].compare(NULL) != 0){
+		cout << identifiers[x] << " ";
+		x ++;
+	}
+	cout << endl;
+	x = 0;
+	cout << "Constants: ";
+	while (constants[x].compare(NULL) != 0){
+		cout << constants[x] << " ";
+		x ++;
+	}
+	cout << endl;
+	x = 0;
+	cout << "Operators: ";
+	while (constants[x].compare(NULL) != 0){
+		cout << constants[x] << " ";
+		x ++;
+	}
+	cout << endl;
+	x = 0;
+	cout << "Delimiters: ; ," << endl;
+	cout << "Syntax Errors(s): ";
+	
+	if (syntaxEmpty(syntaxErrors)){
+		cout << "NA" <<endl;
+	} else {
+		while (syntaxErrors[x].compare(NULL) != 0){
+			cout << syntaxErrors[x] << " ";
+			x ++;
+		}
+		if (paranthesis < 0){
+			cout << "( ";
+		} else if (paranthesis > 0){
+			cout << ") ";
+		}
+		if (forAndEnds < 0){
+			cout << "Exatra END ";
+		} else if (forAndEnds > 0){
+			cout << "END ";
+		}
+		cout << endl;
+	}
+}
 
+bool syntaxEmpty(string* syntaxErrors){
+	bool errorsOrNah = false;
+	
+	for (int x = 0; x < syntaxErrors -> length(); x++){
+		if (syntaxErrors[x].compare(NULL) == 0){
+			errorsOrNah = true;
+		}
+	}
+	
+	return errorsOrNah;
+}
 
-
-
-//use stack to hold syntax errors
-//use stack to hold which keywords are used
-//use stack to hold identifiers
-//use stack to hold constants
-//use stack to hold operators
-//use stack to hold delimets
+//fix syntax errors, must count paranthesis, must count ends, if nothing then must print NA

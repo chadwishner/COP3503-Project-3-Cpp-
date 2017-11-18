@@ -59,9 +59,10 @@ enum State {
 	END,
 };
 
-//string[] convertToArray (Stack stack);
-void print(string[] keywords, string[] identifiers, string[] constants, string[] operators, string[] delimiters, sting[] syntaxErrors);
+string* convertToArray(Stack* stack);
 
+void print(int maxDepth, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors);
 
+bool syntaxEmpty(string* syntaxErrors);
 
 #endif pa3_h

@@ -49,6 +49,7 @@ int main(int argc, const char * argv[]) {
 			
 			int index;
 			string var;
+//			int backindex;
 			
 			switch(state){
 				case FOR:
@@ -60,17 +61,17 @@ int main(int argc, const char * argv[]) {
 				case PARENTHESIS_VAR:
 					index = 0;
 					var = "";
-					while (nextExp[index] == '(' || index != nextExp.length() - 1){
-							paranthesis ++;
-							if (index < nextExp.length() - 1){
-								index ++;
-							}
-						}
-					while (nextExp[index] !=  ',' || index != nextExp.length() - 1){
-						var += nextExp[index];
-						if (index < nextExp.length() - 1){
+					while (nextExp[index] == '(' || index <= nextExp.length() - 1){
+						paranthesis ++;
+//						if (index < nextExp.length() - 1){
 							index ++;
-						}
+//						}
+					}
+					while (nextExp[index] !=  ','){
+						var += nextExp[index];
+//						if (index < nextExp.length() - 1){
+							index ++;
+//						}
 					}
 					identifiers -> push(var);
 					
@@ -80,11 +81,11 @@ int main(int argc, const char * argv[]) {
 				case CONSTANT:
 					index = 0;
 					var = "";
-					while (nextExp[index] !=  ',' || index != nextExp.length() - 1){
+					while (nextExp[index] !=  ','){
 						var += nextExp[index];
-						if (index < nextExp.length() - 1){
+//						if (index < nextExp.length() - 1){
 							index ++;
-						}
+//						}
 					}
 					
 					constants -> push(var);
@@ -100,11 +101,10 @@ int main(int argc, const char * argv[]) {
 						operators -> push("--");
 						index = 2;
 					}
-					while (nextExp[index] == ')' || index != nextExp.length() - 1){
+					index = nextExp.length();
+					while (nextExp[index] == ')'){
 						paranthesis --;
-						if (index < nextExp.length() - 1){
-							index ++;
-						}
+						index --;
 					}
 					state = BEGIN;
 					break;
@@ -139,6 +139,8 @@ int main(int argc, const char * argv[]) {
 					break;
 					
 				case VAR_CONSTANT:
+//if its a number, push to constant, if not push to identifiers
+					if (nextExp )
 					constants -> push(nextExp);
 					state = FOR_OR_END_OR_EXP;
 					break;
@@ -152,16 +154,25 @@ int main(int argc, const char * argv[]) {
 						keywords -> push("END");
 						forAndEnds --;
 						currentDepth --;
+						state = END;
 					} else if (nextExp == "+" || nextExp == "-" || nextExp == "/" || nextExp == "*" || nextExp == "%"){
 						operators -> push(nextExp);
 						state = VAR_CONSTANT;
-					} else if (!file.good()){
+					}					break;
+
+				case END:
+					if (nextExp == "FOR"){
+						keywords -> push("FOR");
+						forAndEnds ++;
+						state = PARENTHESIS_VAR;
+					} else if (nextExp == "END"){
+						keywords -> push("END");
+						forAndEnds --;
+						currentDepth --;
+						state = END;
+					}else if (!file.good()){
 						break;
 					}
-					break;
-
-					//is this thing even necessary
-				case END:
 
 					break;
 			}
@@ -179,26 +190,32 @@ int main(int argc, const char * argv[]) {
 	operatorsString = convertToArray(operators);
 	errorsString = convertToArray(errors);
 	
-	print(maxDepth, keywordsString, identifiersString, constantsString, operatorsString, errorsString);
+	print(maxDepth, paranthesis, forAndEnds, keywordsString, identifiersString, constantsString, operatorsString, errorsString);
 
 	return 0;
 }
 
-string* convertToArray(Stack stack){
+string* convertToArray(Stack* stack){
 	string* array = new string[10];
 	string temp;
 	bool alreadyThere = false;
 	
-	while (stack.isEmpty()){
-		temp = stack.pop();
-		for (int x = 0; x < array -> length(); x++){
+	for (int x = 0; x < 10; x++){
+		array[x] = "";
+	}
+	
+	while (stack -> isEmpty()){
+		temp = stack -> pop();
+		alreadyThere = false;
+		for (int x = 0; x < 10; x++){
 			if (temp == array[x]){
 				alreadyThere = true;
 			}
 		}
-		for (int y = 0; y < array -> length(); y++){
-			if (array[y].compare(NULL) == 0 && !alreadyThere){
+		for (int y = 0; y < 10; y++){
+			if (array[y] == "" && !alreadyThere){
 				array[y] = temp;
+				alreadyThere = true;
 			}
 		}
 		alreadyThere = false;
@@ -209,41 +226,41 @@ string* convertToArray(Stack stack){
 void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors){
 	int x = 0;
 	cout << "The depth of nested loop(s) is " << maxDepth << endl;
-	cout << "Keywords: ";
-	while (keywords[x].compare(NULL) != 0){
+	cout << "\nKeywords: ";
+	while (keywords[x] != ""){
 		cout << keywords[x] << " ";
 		x ++;
 	}
 	cout << endl;
 	x = 0;
 	cout << "Identifiers: ";
-	while (identifiers[x].compare(NULL) != 0){
+	while (identifiers[x]!= ""){
 		cout << identifiers[x] << " ";
 		x ++;
 	}
 	cout << endl;
 	x = 0;
 	cout << "Constants: ";
-	while (constants[x].compare(NULL) != 0){
+	while (constants[x] != ""){
 		cout << constants[x] << " ";
 		x ++;
 	}
 	cout << endl;
 	x = 0;
 	cout << "Operators: ";
-	while (constants[x].compare(NULL) != 0){
+	while (constants[x] != ""){
 		cout << constants[x] << " ";
 		x ++;
 	}
 	cout << endl;
 	x = 0;
 	cout << "Delimiters: ; ," << endl;
-	cout << "Syntax Errors(s): ";
+	cout << "\nSyntax Errors(s): ";
 	
 	if (syntaxEmpty(syntaxErrors)){
 		cout << "NA" <<endl;
 	} else {
-		while (syntaxErrors[x].compare(NULL) != 0){
+		while (syntaxErrors[x] != ""){
 			cout << syntaxErrors[x] << " ";
 			x ++;
 		}
@@ -253,7 +270,7 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 			cout << ") ";
 		}
 		if (forAndEnds < 0){
-			cout << "Exatra END ";
+			cout << "Extra END ";
 		} else if (forAndEnds > 0){
 			cout << "END ";
 		}
@@ -265,7 +282,7 @@ bool syntaxEmpty(string* syntaxErrors){
 	bool errorsOrNah = false;
 	
 	for (int x = 0; x < syntaxErrors -> length(); x++){
-		if (syntaxErrors[x].compare(NULL) == 0){
+		if (syntaxErrors[x] == ""){
 			errorsOrNah = true;
 		}
 	}
@@ -273,4 +290,7 @@ bool syntaxEmpty(string* syntaxErrors){
 	return errorsOrNah;
 }
 
-//fix syntax errors, must count paranthesis, must count ends, if nothing then must print NA
+//fix syntax errors, must count paranthesis, must count ends
+//Fix where things are getting added to errors
+//Fix identifiers/constant
+//ask if i have the right amount of states for statemachine, not sure why i need that last end

@@ -41,9 +41,14 @@ bool Stack::isEmpty(){
 }
 
 string Stack::pop(){
-	string pop = array[top];
-	top--;
-	return pop;
+	string pop;
+	if (isEmpty()){
+		pop = array[top];
+		top--;
+		return pop;
+	} else {
+		return "Stack Empty";
+	}
 }
 
 enum State {
@@ -61,7 +66,7 @@ enum State {
 
 string* convertToArray(Stack* stack);
 
-void print(int maxDepth, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors);
+void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors);
 
 bool syntaxEmpty(string* syntaxErrors);
 

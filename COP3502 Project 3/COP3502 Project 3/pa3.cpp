@@ -112,9 +112,13 @@ string* convertToArray(Stack* stack){
 }
 
 /* Print function
- @param int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors
+ @param int maxDepth, int paranthesis, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors
  */
-void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors){
+void print(int maxDepth, int paranthesis, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors){
+	
+	if (maxDepth < 0){
+		maxDepth = 0;
+	}
 	
 	//print correct format
 	int x = 0;
@@ -158,7 +162,7 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 	cout << "\nSyntax Errors(s): ";
 	
 	//use helper function to check if the array is empty, if so, print NA
-	if (syntaxEmpty(syntaxErrors) && paranthesis == 0 && forAndEnds == 0){
+	if (syntaxEmpty(syntaxErrors) && paranthesis == 0){
 		cout << "NA" <<endl;
 	
 	//else print the proper errors
@@ -171,9 +175,6 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 			cout << ") ";
 		} else if (paranthesis > 0){
 			cout << "( ";
-		}
-		if (forAndEnds > 0){
-			cout << "END ";
 		}
 		cout << endl;
 	}
@@ -207,11 +208,10 @@ int main(int argc, const char * argv[]) {
 	string line;
 	
 	//create ints for depth
-	int currentDepth = 0;
-	int maxDepth = 0;
+	int currentDepth = -1;
+	int maxDepth = -1;
 	
-	//create ints for for/end and paranthesis
-	int forAndEnds = 0;
+	//create int for paranthesis
 	int paren = 0;
 	
 	
@@ -257,8 +257,8 @@ int main(int argc, const char * argv[]) {
 					//check to get proper keyword, then do proper steps
 					if (temp == "FOR"){
 						keywords -> push(temp);
-					} else if (temp == "BEGIN"){
 						depth -> push(temp);
+					} else if (temp == "BEGIN"){
 						currentDepth ++;
 						keywords -> push(temp);
 					} else if (temp == "END"){
@@ -271,7 +271,7 @@ int main(int argc, const char * argv[]) {
 							
 							currentDepth --;
 						} else {
-							errors -> push("Extra End");
+							errors -> push("Extra END");
 						}
 						keywords -> push(temp);
 					} else {
@@ -363,7 +363,7 @@ int main(int argc, const char * argv[]) {
 	errorsString = convertToArray(errors);
 	
 	//call print function
-	print(maxDepth, paren, forAndEnds, keywordsString, identifiersString, constantsString, operatorsString, delimetersString, errorsString);
+	print(maxDepth, paren, keywordsString, identifiersString, constantsString, operatorsString, delimetersString, errorsString);
 	
 	return 0;
 }

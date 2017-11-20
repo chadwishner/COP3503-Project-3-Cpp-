@@ -20,7 +20,7 @@ class Stack {
 
 string* convertToArray(Stack* stack);
 
-void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors);
+void print(int maxDepth, int paranthesis, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors);
 
 bool syntaxEmpty(string* syntaxErrors);
 

@@ -1,198 +1,42 @@
 // Chad Wishner
 // COP3502 Project 3
 
-
 #include "pa3.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 using namespace std;
 
-//string keywords[] = {"BEGIN", "END", "FOR"};
-//string operators[] = {"&&", "||", "=", "<", ">", "<=", ">=", "==","!","!=", "--", "++", "+", "-", "*", "/"};
-//string delimiters[] = {"(",")",",",";"};
+Stack::Stack(){
+	top = -1;
+}
 
-
-int paran = 0;
-
-int main(int argc, const char * argv[]) {
-	ifstream file;
-	string fileName = "";
-	
-	string line;
-	string nextExp;
-	
-	int forAndEnds = 0;
-	int currentDepth = 0;
-	int maxDepth = 0;
-	int paranthesis = 0;
-	
-	Stack* keywords = new Stack();
-	Stack* identifiers = new Stack();
-	Stack* constants = new Stack();
-	Stack* operators = new Stack();
-//	Stack* Delimiters = new Stack();
-	Stack* errors = new Stack();
-	
-	cout << "Please enter the name of the input file: " << endl;
-	cin >> fileName;
-	
-	file.open(fileName);
-	if (!file) {
-		cout << "Unable to open file";
-		exit(1); // terminate with error
-	} else if (file.is_open()){
-		State state = FOR;
-		
-		while (file.good()){
-			file >> nextExp;
-			
-			int index;
-			string var;
-//			int backindex;
-			
-			switch(state){
-				case FOR:
-					keywords -> push("FOR");
-					forAndEnds ++;
-					state = PARENTHESIS_VAR;
-					break;
-					
-				case PARENTHESIS_VAR:
-					index = 0;
-					var = "";
-					while (nextExp[index] == '(' || index <= nextExp.length() - 1){
-						paranthesis ++;
-//						if (index < nextExp.length() - 1){
-							index ++;
-//						}
-					}
-					while (nextExp[index] !=  ','){
-						var += nextExp[index];
-//						if (index < nextExp.length() - 1){
-							index ++;
-//						}
-					}
-					identifiers -> push(var);
-					
-					state = CONSTANT;
-					break;
-					
-				case CONSTANT:
-					index = 0;
-					var = "";
-					while (nextExp[index] !=  ','){
-						var += nextExp[index];
-//						if (index < nextExp.length() - 1){
-							index ++;
-//						}
-					}
-					
-					constants -> push(var);
-					state = OPERATOR_PARENTHESIS;
-					break;
-					
-				case OPERATOR_PARENTHESIS:
-					index = 0;
-					if (nextExp.substr(0, 2) == "++"){
-						operators -> push("++");
-						index = 2;
-					} else if (nextExp.substr(0, 2) == "--"){
-						operators -> push("--");
-						index = 2;
-					}
-					index = nextExp.length();
-					while (nextExp[index] == ')'){
-						paranthesis --;
-						index --;
-					}
-					state = BEGIN;
-					break;
-					
-				case BEGIN:
-					if (nextExp == "BEGIN"){
-						keywords -> push("BEGIN");
-						currentDepth ++;
-						if (currentDepth > maxDepth){
-							maxDepth = currentDepth;
-						}
-					} else {
-						errors -> push(nextExp);
-					}
-					state = FOR_OR_EXPRESS;
-					break;
-					
-				case FOR_OR_EXPRESS:
-					if (nextExp == "FOR"){
-						keywords -> push("FOR");
-						forAndEnds ++;
-						state = PARENTHESIS_VAR;
-					} else{
-						identifiers -> push(nextExp.substr(0, nextExp.find('=')));
-						state = PARENTHESIS_VAR;
-					}
-					break;
-					
-				case EXPRESS_OPERATOR:
-					operators -> push(nextExp);
-					state = VAR_CONSTANT;
-					break;
-					
-				case VAR_CONSTANT:
-//if its a number, push to constant, if not push to identifiers
-					if (nextExp )
-					constants -> push(nextExp);
-					state = FOR_OR_END_OR_EXP;
-					break;
-					
-				case FOR_OR_END_OR_EXP:
-					if (nextExp == "FOR"){
-						keywords -> push("FOR");
-						forAndEnds ++;
-						state = PARENTHESIS_VAR;
-					} else if (nextExp == "END"){
-						keywords -> push("END");
-						forAndEnds --;
-						currentDepth --;
-						state = END;
-					} else if (nextExp == "+" || nextExp == "-" || nextExp == "/" || nextExp == "*" || nextExp == "%"){
-						operators -> push(nextExp);
-						state = VAR_CONSTANT;
-					}					break;
-
-				case END:
-					if (nextExp == "FOR"){
-						keywords -> push("FOR");
-						forAndEnds ++;
-						state = PARENTHESIS_VAR;
-					} else if (nextExp == "END"){
-						keywords -> push("END");
-						forAndEnds --;
-						currentDepth --;
-						state = END;
-					}else if (!file.good()){
-						break;
-					}
-
-					break;
-			}
-		}
+void Stack::push (string var){
+	if (top == 99){
+		cout << "Stack is full" << endl;
+		return;
 	}
-	string* keywordsString = new string[10];
-	string* identifiersString = new string[10];
-	string* constantsString = new string[10];
-	string* operatorsString = new string[10];
-	string* errorsString = new string[10];
-	
-	keywordsString = convertToArray(keywords);
-	identifiersString = convertToArray(identifiers);
-	constantsString = convertToArray(constants);
-	operatorsString = convertToArray(operators);
-	errorsString = convertToArray(errors);
-	
-	print(maxDepth, paranthesis, forAndEnds, keywordsString, identifiersString, constantsString, operatorsString, errorsString);
+	top++;
+	array[top] = var;
+}
 
-	return 0;
+bool Stack::isEmpty(){
+	bool isTrue = true;
+	if (top == -1){
+		return false;
+	}
+	return isTrue;
+}
+
+string Stack::pop(){
+	string pop;
+	if (isEmpty()){
+		pop = array[top];
+		top--;
+		return pop;
+	} else {
+		return "Stack Empty";
+	}
 }
 
 string* convertToArray(Stack* stack){
@@ -223,7 +67,7 @@ string* convertToArray(Stack* stack){
 	return array;
 }
 
-void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* syntaxErrors){
+void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, string* identifiers, string* constants, string* operators, string* delimeters, string* syntaxErrors){
 	int x = 0;
 	cout << "The depth of nested loop(s) is " << maxDepth << endl;
 	cout << "\nKeywords: ";
@@ -248,13 +92,20 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 	cout << endl;
 	x = 0;
 	cout << "Operators: ";
-	while (constants[x] != ""){
-		cout << constants[x] << " ";
+	while (operators[x] != ""){
+		cout << operators[x] << " ";
 		x ++;
 	}
 	cout << endl;
 	x = 0;
-	cout << "Delimiters: ; ," << endl;
+	cout << "Delimiters: ";
+	while (delimeters[x] != ""){
+		cout << delimeters[x] << " ";
+		x ++;
+	}
+	
+	cout << endl;
+	x = 0;
 	cout << "\nSyntax Errors(s): ";
 	
 	if (syntaxEmpty(syntaxErrors)){
@@ -265,13 +116,11 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 			x ++;
 		}
 		if (paranthesis < 0){
-			cout << "( ";
-		} else if (paranthesis > 0){
 			cout << ") ";
+		} else if (paranthesis > 0){
+			cout << "( ";
 		}
-		if (forAndEnds < 0){
-			cout << "Extra END ";
-		} else if (forAndEnds > 0){
+		if (forAndEnds > 0){
 			cout << "END ";
 		}
 		cout << endl;
@@ -279,18 +128,160 @@ void print(int maxDepth, int paranthesis, int forAndEnds, string* keywords, stri
 }
 
 bool syntaxEmpty(string* syntaxErrors){
-	bool errorsOrNah = false;
+	bool errorsOrNah = true;
 	
 	for (int x = 0; x < syntaxErrors -> length(); x++){
-		if (syntaxErrors[x] == ""){
-			errorsOrNah = true;
+		if (syntaxErrors[x] != ""){
+			errorsOrNah = false;
 		}
 	}
 	
 	return errorsOrNah;
 }
 
-//fix syntax errors, must count paranthesis, must count ends
-//Fix where things are getting added to errors
-//Fix identifiers/constant
-//ask if i have the right amount of states for statemachine, not sure why i need that last end
+int main(int argc, const char * argv[]) {
+	ifstream file;
+	string fileName = "";
+	
+	string line;
+	string nextExp;
+	
+	int currentDepth = 0;
+	int maxDepth = 0;
+	
+	int forAndEnds = 0;
+	int paren = 0;
+	
+	Stack* paranthesis = new Stack();
+	Stack* depth = new Stack();
+	Stack* keywords = new Stack();
+	Stack* identifiers = new Stack();
+	Stack* constants = new Stack();
+	Stack* operators = new Stack();
+	Stack* delimiters = new Stack();
+	Stack* errors = new Stack();
+	
+	cout << "Please enter the name of the input file: " << endl;
+	cin >> fileName;
+	
+	file.open(fileName);
+	if (!file) {
+		cout << "Unable to open file";
+		exit(1);
+	} else if (file.is_open()){
+		
+		while (getline(file, line)){
+			
+			int counter = 0;
+			
+			line = line.c_str();
+			
+			while (line[counter] != NULL){
+				
+				if (line[counter] >= 'A' && line[counter] <= 'Z'){
+					string temp = "";
+					while (line[counter] >= 'A' && line[counter] <= 'Z'){
+						temp += line[counter];
+						counter ++;
+					}
+					
+					if (temp == "FOR"){
+						keywords -> push(temp);
+					} else if (temp == "BEGIN"){
+						depth -> push(temp);
+						currentDepth ++;
+						keywords -> push(temp);
+					} else if (temp == "END"){
+						if (depth -> isEmpty()){
+							depth -> pop();
+							
+							if (maxDepth < currentDepth){
+								maxDepth = currentDepth;
+							}
+							
+							currentDepth --;
+						} else {
+							errors -> push("Extra End");
+						}
+						keywords -> push(temp);
+					} else {
+						errors -> push(temp);
+					}
+					
+				} else if (line[counter] >= 'a' && line[counter] <= 'z'){
+					string temp = "";
+					
+					while (line[counter] >= 'a' && line[counter] <= 'z'){
+						temp += line[counter];
+						counter ++;
+					}
+					identifiers -> push(temp);
+					
+				} else if (line[counter] == '('){
+					paranthesis -> push("(");
+					paren ++;
+					counter ++;
+				} else if (line[counter] == ')'){
+					if (paranthesis -> isEmpty()){
+						paranthesis -> pop();
+					}
+					paren --;
+					counter ++;
+				} else if (line[counter] >= '0' && line[counter] <= '9'){
+					string temp = "";
+					while (line[counter] >= '0' && line[counter] <= '9'){
+						temp += line[counter];
+						counter ++;
+					}
+					constants -> push(temp);
+					
+				} else if (line[counter] == '+' || line[counter] == '-' || line[counter] == '*' || line[counter] == '/' || line[counter] == '%'){
+					string temp = "";
+					while (line[counter] == '+' || line[counter] == '-' || line[counter] == '*' || line[counter] == '/' || line[counter] == '%'){
+						temp += line[counter];
+						counter ++;
+					}
+					
+					operators -> push(temp);
+					
+				} else if (line[counter] == '='){
+					string temp = "";
+					operators -> push("=");
+					counter ++;
+					
+				} else if (line[counter] == ',' ){
+					delimiters -> push(",");
+					counter ++;
+				} else if (line[counter] == ';'){
+					delimiters -> push(";");
+					counter ++;
+				} else {
+					counter ++;
+				}
+			}
+		}
+		
+	}
+	
+	if (depth -> isEmpty()){
+		errors -> push("END");
+	}
+	
+	string* keywordsString = new string[10];
+	string* identifiersString = new string[10];
+	string* constantsString = new string[10];
+	string* operatorsString = new string[10];
+	string* delimetersString = new string[10];
+	string* errorsString = new string[10];
+	
+	keywordsString = convertToArray(keywords);
+	identifiersString = convertToArray(identifiers);
+	constantsString = convertToArray(constants);
+	operatorsString = convertToArray(operators);
+	delimetersString = convertToArray(delimiters);
+	errorsString = convertToArray(errors);
+	
+	print(maxDepth, paren, forAndEnds, keywordsString, identifiersString, constantsString, operatorsString, delimetersString, errorsString);
+	
+	return 0;
+}

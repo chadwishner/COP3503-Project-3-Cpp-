@@ -271,7 +271,7 @@ int main(int argc, const char * argv[]) {
 							
 							currentDepth --;
 						} else {
-							errors -> push("Extra END");
+							errors -> push("END");
 						}
 						keywords -> push(temp);
 					} else {
